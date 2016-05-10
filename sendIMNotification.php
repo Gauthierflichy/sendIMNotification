@@ -2,17 +2,20 @@
 
 require 'functions.fn.php';
 
-$user = 'Flichy';
-$mdp = '%9T1B3$oqv4e';
-$channel = 'GENERAL'; // default channel
+$user = 'Flichy';                      // Username
+$mdp = '%9T1B3$oqv4e';                 // password
+$channel = 'GENERAL';                  // default channel
+$msg = "Je suis un pote à Gé!";        // default message
 
-$connection = RocketChatLogin($user, $mdp);                                                         // Login function with user and password as parameters
+// Login to https://demo.rocket.chat/
+$connection = RocketChatLogin($user, $mdp);
 
+//List all public channels (uncomment to use)
+//$publicRoomsList = RocketChatListRooms($connection->data->authToken, $connection->data->userId);
+//var_dump($publicRoomsList->rooms);
 
-// Uncomment to use the function (it takes a while to list all rooms)
-
-    /*$publicRoomsList = RocketChatListRooms($connection->data->authToken, $connection->data->userId);    // Returns an object containing all public rooms and their infos
-
-    var_dump($publicRoomsList->rooms);*/
-
+// Join a specific channel
 $join = RocketChatJoinChannel($channel, $connection->data->authToken, $connection->data->userId);
+
+// Send a message to the specific channel
+$sendMsg = RocketChatSendMessage($msg, $channel, $connection->data->authToken, $connection->data->userId);

@@ -1,6 +1,6 @@
 <?php
 
-/* Login in Rocket Chat */
+/* Login in Rocket Chat using unsername and password*/
 
 function RocketChatLogin($user, $mdp){
     $postData = '';
@@ -32,7 +32,7 @@ function RocketChatLogin($user, $mdp){
 
     if($curl_response->status === "success"){
         echo 'Login successful !';
-        return $curl_response;
+        return $curl_response; // The function return authToken and userId
     } else {
         echo "Login failed !";
     }
@@ -62,13 +62,11 @@ function RocketChatListRooms($authToken, $userId){
 
     $curl_response = json_decode(curl_exec($curl));
 
-    //var_dump($curl_response->rooms->_id);
-
     if($curl_response->status === "success"){
-        echo 'Request successful !';
-        return $curl_response;
+        echo "\n".'Request successful !';
+        return $curl_response; // The function retrun an object with all public rooms and their infos
     } else {
-        echo "Request failed !";
+        echo "\n"."Request failed !";
     }
 
     curl_close($curl);
@@ -104,9 +102,46 @@ function RocketChatJoinChannel($channel, $authToken, $userId){
     curl_close($curl);
 
     if($curl_response->status === "success"){
-        echo 'Join successful !';
+        echo "\n".'Join successful !';
+        return $curl_response; // Return success or error
+    } else {
+        echo "\n"."Join failed !";
+    }
+}
+
+/* Send a message in a channel */
+
+function RocketChatSendMessage($msg, $channel, $authToken, $userId){
+    $postData = '';
+    $url = 'https://demo.rocket.chat/api/rooms/'.$channel.'/send';
+    $curl = curl_init($url);
+
+    $curl_post_data = array(
+        'msg' => $msg
+    );
+
+    foreach($curl_post_data as $k => $v)
+    {
+        $postData .= $k . '='.$v.'&';
+    }
+
+    $postData = rtrim($postData, '&');
+
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl,CURLOPT_HTTPHEADER,array("X-Auth-Token: ".$authToken, "X-User-Id: ".$userId));
+
+    $curl_response = json_decode(curl_exec($curl));
+
+    curl_close($curl);
+
+    if($curl_response->status === "success"){
+        echo "\n".'Message sent !'; // Return success or error
         return $curl_response;
     } else {
-        echo "Join failed !";
+        echo "\n"."Failed to send message !";
     }
 }
