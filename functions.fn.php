@@ -48,6 +48,13 @@ function RocketChatListRooms($authToken, $userId){
 
     $curl = curl_init();
 
+    $postData = "{}";
+
+
+    $postData = rtrim($postData, '&');
+
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
     curl_setopt($curl,CURLOPT_URL, $url);
     curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -65,4 +72,41 @@ function RocketChatListRooms($authToken, $userId){
     }
 
     curl_close($curl);
+}
+
+/* Join a specefic room */
+
+function RocketChatJoinChannel($channel, $authToken, $userId){
+    $postData = '';
+    $url = 'https://demo.rocket.chat/api/rooms/'.$channel.'/join';
+    $curl = curl_init($url);
+
+    $curl_post_data = array(
+        '{}'
+    );
+
+    foreach($curl_post_data as $k => $v)
+    {
+        $postData .= $k . '='.$v.'&';
+    }
+
+    $postData = rtrim($postData, '&');
+
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl,CURLOPT_HTTPHEADER,array("X-Auth-Token: ".$authToken, "X-User-Id: ".$userId));
+
+    $curl_response = json_decode(curl_exec($curl));
+
+    curl_close($curl);
+
+    if($curl_response->status === "success"){
+        echo 'Join successful !';
+        return $curl_response;
+    } else {
+        echo "Join failed !";
+    }
 }
