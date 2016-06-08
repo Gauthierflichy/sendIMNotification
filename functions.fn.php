@@ -2,9 +2,9 @@
 
 /* Login in Rocket Chat using unsername and password*/
 
-function RocketChatLogin($user, $mdp){
+function RocketChatLogin($CHATHOSTNAME, $user, $mdp){
     $postData = '';
-    $url = 'https://demo.rocket.chat/api/login';
+    $url = $CHATHOSTNAME.'/login';
     $curl = curl_init($url);
 
     $curl_post_data = array(
@@ -27,8 +27,8 @@ function RocketChatLogin($user, $mdp){
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 
     $curl_response = json_decode(curl_exec($curl));
-
     curl_close($curl);
+
 
     if($curl_response->status === "success"){
         echo 'Login successful !';
@@ -42,41 +42,47 @@ function RocketChatLogin($user, $mdp){
 
 /* Get Public Rooms in RocketChat */
 
-function RocketChatListRooms($authToken, $userId){
+function RocketChatListRooms($CHATHOSTNAME, $authToken, $userId){
+    $postData = '';
+    $url = $CHATHOSTNAME.'/publicRooms';
+    var_dump($url);
+    $curl = curl_init($url);
 
-    $url = 'https://demo.rocket.chat/api/publicRooms';
+    /*$curl_post_data = array(
+        '{}'
+    );
 
-    $curl = curl_init();
+    foreach($curl_post_data as $k => $v)
+    {
+        $postData .= $k . '='.$v.'&';
+    }
 
-    $postData = "{}";
+    $postData = rtrim($postData, '&');*/
 
-
-    $postData = rtrim($postData, '&');
-
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($curl,CURLOPT_URL, $url);
-    curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($curl, CURLOPT_POST, false);
+    /*curl_setopt($curl, CURLOPT_POSTFIELDS);*/
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl,CURLOPT_HTTPHEADER,array("X-Auth-Token: ".$authToken, "X-User-Id: ".$userId));
 
     $curl_response = json_decode(curl_exec($curl));
 
-    if($curl_response->status === "success"){
-        echo "\n".'Request successful !';
-        return $curl_response; // The function retrun an object with all public rooms and their infos
-    } else {
-        echo "\n"."Request failed !";
-    }
-
     curl_close($curl);
+    var_dump($curl_response);
+    if($curl_response->status === "success"){
+        echo "\n".'Join successful !';
+        return $curl_response; // Return success or error
+    } else {
+        echo "\n"."Join failed !";
+    }
 }
 
 /* Join a specefic room */
 
-function RocketChatJoinChannel($channel, $authToken, $userId){
+function RocketChatJoinChannel($CHATHOSTNAME, $channel, $authToken, $userId){
     $postData = '';
-    $url = 'https://demo.rocket.chat/api/rooms/'.$channel.'/join';
+    $url = $CHATHOSTNAME.'/rooms/'.$channel.'/join';
     $curl = curl_init($url);
 
     $curl_post_data = array(
@@ -111,9 +117,9 @@ function RocketChatJoinChannel($channel, $authToken, $userId){
 
 /* Send a message in a channel */
 
-function RocketChatSendMessage($msg, $channel, $authToken, $userId){
+function RocketChatSendMessage($CHATHOSTNAME, $msg, $channel, $authToken, $userId){
     $postData = '';
-    $url = 'https://demo.rocket.chat/api/rooms/'.$channel.'/send';
+    $url = $CHATHOSTNAME.'/rooms/'.$channel.'/send';
     $curl = curl_init($url);
 
     $curl_post_data = array(
