@@ -42,25 +42,12 @@ function RocketChatLogin($CHATHOSTNAME, $user, $mdp){
 
 /* Get Public Rooms in RocketChat */
 
-function RocketChatListRooms($CHATHOSTNAME, $authToken, $userId){
-    $postData = '';
+function RocketChatListRooms($CHATHOSTNAME, $channel, $authToken, $userId){
     $url = $CHATHOSTNAME.'/publicRooms';
-    var_dump($url);
+    //var_dump($url);
     $curl = curl_init($url);
 
-    /*$curl_post_data = array(
-        '{}'
-    );
-
-    foreach($curl_post_data as $k => $v)
-    {
-        $postData .= $k . '='.$v.'&';
-    }
-
-    $postData = rtrim($postData, '&');*/
-
     curl_setopt($curl, CURLOPT_POST, false);
-    /*curl_setopt($curl, CURLOPT_POSTFIELDS);*/
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -69,20 +56,27 @@ function RocketChatListRooms($CHATHOSTNAME, $authToken, $userId){
     $curl_response = json_decode(curl_exec($curl));
 
     curl_close($curl);
-    var_dump($curl_response);
+    //var_dump($curl_response);
     if($curl_response->status === "success"){
-        echo "\n".'Join successful !';
-        return $curl_response; // Return success or error
+        foreach ($curl_response->rooms as $k => $v){
+            if($v->name == $channel){
+                $channelId = $v->_id;
+                echo "\n".'Room id found !';
+                return $channelId; // Return success or error
+            }
+            //var_dump($v->name, $channelId);
+        }
     } else {
-        echo "\n"."Join failed !";
+        echo "\n"."Room id not found !";
     }
 }
 
 /* Join a specefic room */
 
-function RocketChatJoinChannel($CHATHOSTNAME, $channel, $authToken, $userId){
+function RocketChatJoinChannel($CHATHOSTNAME, $channelId, $authToken, $userId){
     $postData = '';
-    $url = $CHATHOSTNAME.'/rooms/'.$channel.'/join';
+    $url = $CHATHOSTNAME.'/rooms/'.$channelId.'/join';
+    //var_dump($url);
     $curl = curl_init($url);
 
     $curl_post_data = array(
@@ -96,7 +90,7 @@ function RocketChatJoinChannel($CHATHOSTNAME, $channel, $authToken, $userId){
 
     $postData = rtrim($postData, '&');
 
-    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POST, false);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -106,7 +100,7 @@ function RocketChatJoinChannel($CHATHOSTNAME, $channel, $authToken, $userId){
     $curl_response = json_decode(curl_exec($curl));
 
     curl_close($curl);
-
+    //var_dump($curl_response);
     if($curl_response->status === "success"){
         echo "\n".'Join successful !';
         return $curl_response; // Return success or error
@@ -117,9 +111,9 @@ function RocketChatJoinChannel($CHATHOSTNAME, $channel, $authToken, $userId){
 
 /* Send a message in a channel */
 
-function RocketChatSendMessage($CHATHOSTNAME, $msg, $channel, $authToken, $userId){
+function RocketChatSendMessage($CHATHOSTNAME, $msg, $channelId, $authToken, $userId){
     $postData = '';
-    $url = $CHATHOSTNAME.'/rooms/'.$channel.'/send';
+    $url = $CHATHOSTNAME.'/rooms/'.$channelId.'/send';
     $curl = curl_init($url);
 
     $curl_post_data = array(
